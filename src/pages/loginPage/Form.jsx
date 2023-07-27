@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import {
   Box,
@@ -6,29 +7,32 @@ import {
   useMediaQuery,
   Typography,
   useTheme,
+  IconButton
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Formik } from "formik";
+import { ToastContainer,toast } from "react-toastify";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLogin, setFriends } from "../../state";
+import { setLogin, setFriends, setProfileFriends } from "../../state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "../../Components/FlexBetween";
 import {host, loginRoute, registerRoute} from '../../utils/APIRoutes';
+import 'react-toastify/dist/ReactToastify.css';
 
 const registerSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
-  picture: yup.string().required("required"),
+  firstName: yup.string().required("Trống"),
+  lastName: yup.string().required("Trống"),
+  email: yup.string().email("invalid email").required("Trống"),
+  password: yup.string().min(6, "Tối thiểu 6 kí tự").required("Trống"),
+  // picture: yup.string().required("Trống"),
 });
 
 const loginSchema = yup.object().shape({
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+  email: yup.string().email("Yêu cầu email").required("Trống"),
+  password: yup.string().min(6, "Tối thiểu 6 kí tự").required("Trống"),
 });
 
 const initialValuesRegister = {
@@ -36,7 +40,7 @@ const initialValuesRegister = {
   lastName: "",
   email: "",
   password: "",
-  picture: "",
+  // picture: "",
 };
 
 const initialValuesLogin = {
@@ -46,6 +50,8 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
+  const [showPassword, setShowPassword] = useState(false);
+
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -53,41 +59,64 @@ const Form = () => {
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
 
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 4000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
+  const handleClickShowPassword = () => {
+    setShowPassword((show) => !show);
+  }
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
   const register = async (values, onSubmitProps) => {
     // this allows us to send form info with image
     const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
     }
-    formData.append("picturePath", values.picture.name);
+    // formData.append("picturePath", values.picture.name);
 
-
-    const savedUserResponse = await axios.post(registerRoute, formData);
-    const savedUser = await savedUserResponse.data;
-    onSubmitProps.resetForm();
-
-    if (savedUser) {
-      setPageType("login");
+    try{
+      const savedUserResponse = await axios.post(registerRoute, values);
+      const savedUser = await savedUserResponse.data;
+      onSubmitProps.resetForm();
+      toast.success("Đăng kí thành công", toastOptions);
+      if (savedUser) {
+        setPageType("login");
+      }
+    }catch(error){
+      toast.error(error.response.data.message, toastOptions);
     }
+
   };
 
   const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await axios.post(loginRoute, values);
-    const loggedIn = await loggedInResponse.data;
-    onSubmitProps.resetForm();
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.accessToken,
+    try{
+      const loggedInResponse = await axios.post(loginRoute, values);
+      const loggedIn = await loggedInResponse.data;
+      onSubmitProps.resetForm();
+      if (loggedIn) {
+        dispatch(
+          setLogin({
+            user: loggedIn.user,
+            token: loggedIn.accessToken,
+          })
+        );
+        const response = await axios.get(`${host}/user/${loggedIn.user.userid}/friends`, {
+          headers: { Authorization: loggedIn.accessToken },
         })
-      );
-      const response = await axios.get(`${host}/user/friends`, {
-        headers: { Authorization: loggedIn.accessToken },
-      })
-      const friends = await response.data.friends;
-      dispatch(setFriends({friends: friends}))
-      navigate("/");
+        const friends = await response.data.friends;
+        dispatch(setProfileFriends({friends: friends}));
+        dispatch(setFriends({friends: friends}));
+        navigate("/");
+      }
+    }catch(error){
+      toast.error(error.response.data.error, toastOptions);
     }
   };
 
@@ -97,6 +126,7 @@ const Form = () => {
   };
 
   return (
+    <>
     <Formik
       onSubmit={handleFormSubmit}
       initialValues={isLogin ? initialValuesLogin : initialValuesRegister}
@@ -127,7 +157,7 @@ const Form = () => {
                   label="First Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  value={values.firstName}
+                  value={values.firstName ||''}
                   name="firstName"
                   error={
                     Boolean(touched.firstName) && Boolean(errors.firstName)
@@ -139,13 +169,13 @@ const Form = () => {
                   label="Last Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  value={values.lastName}
+                  value={values.lastName ||''}
                   name="lastName"
                   error={Boolean(touched.lastName) && Boolean(errors.lastName)}
                   helperText={touched.lastName && errors.lastName}
                   sx={{ gridColumn: "span 2" }}
                 />
-                <Box
+                {/* <Box
                   gridColumn="span 4"
                   border={`1px solid ${palette.neutral.medium}`}
                   borderRadius="5px"
@@ -177,7 +207,7 @@ const Form = () => {
                       </Box>
                     )}
                   </Dropzone>
-                </Box>
+                </Box> */}
               </>
             )}
 
@@ -185,7 +215,7 @@ const Form = () => {
               label="Email"
               onBlur={handleBlur}
               onChange={handleChange}
-              value={values.email}
+              value={values.email ||''}
               name="email"
               error={Boolean(touched.email) && Boolean(errors.email)}
               helperText={touched.email && errors.email}
@@ -193,14 +223,27 @@ const Form = () => {
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               onBlur={handleBlur}
               onChange={handleChange}
-              value={values.password}
+              value={values.password ||''}
               name="password"
               error={Boolean(touched.password) && Boolean(errors.password)}
               helperText={touched.password && errors.password}
               sx={{ gridColumn: "span 4" }}
+              autoComplete="off"
+              InputProps={{
+                endAdornment: (
+                  <IconButton 
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+
             />
           </Box>
 
@@ -240,7 +283,10 @@ const Form = () => {
           </Box>
         </form>
       )}
+      
     </Formik>
+    <ToastContainer />
+    </> 
   );
 };
 

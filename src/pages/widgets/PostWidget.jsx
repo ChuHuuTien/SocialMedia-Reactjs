@@ -8,7 +8,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
 import FlexBetween from "../../Components/FlexBetween";
-import Friend from "../../Components/Friend";
+import UserPost from "../../Components/UserPost";
 import WidgetWrapper from "../../Components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,6 +26,7 @@ const PostWidget = ({
   userPicturePath,
   likesByUsers,
   // comments,
+  isProfile
 }) => {
   const [isComments, setIsComments] = useState(false);
   const dispatch = useDispatch();
@@ -51,12 +52,13 @@ const PostWidget = ({
   };
   return (
     <WidgetWrapper m="2rem 0">
-      <Friend
+      <UserPost
         friendId={postUserId}
         name={name}
         createdAt={createdAt}
         userPicturePath={userPicturePath}
         postId={postId}
+        isProfile={isProfile}
       />
       <Typography color={main} sx={{ mt: "1rem" }}>
         {content}

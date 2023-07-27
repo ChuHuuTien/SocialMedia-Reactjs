@@ -6,25 +6,42 @@ import {
   LocationOnOutlined,
   WorkOutlineOutlined,
 } from "@mui/icons-material";
-import { Box, Typography, Divider, useTheme } from "@mui/material";
+import { Box, Typography, Divider, useTheme, IconButton, Modal, useMediaQuery } from "@mui/material";
 import UserImage from "../../Components/UserImage";
 import FlexBetween from "../../Components/FlexBetween";
 import WidgetWrapper from "../../Components/WidgetWrapper";
+import ManageAccount from "../../Components/ManageAccount";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 
-const UserWidget = ({ userId, picturePath }) => {
+const UserWidget = ({ userId, picturePath, isMyself }) => {
   const [user, setUser] = useState(null);
+  const [open, setOpen] = useState(false);
   const { palette } = useTheme();
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
   const dark = palette.neutral.dark;
   const medium = palette.neutral.medium;
   const main = palette.neutral.main;
+  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
 
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '1px solid #ccc!important',
+    borderRadius: '25px',
+    boxShadow: 24,
+    pt: 2,
+    px: 4,
+    pb: 3,
+  };
   const getUser = async () => {
     const response = await axios.get(`${host}/user/${userId}`,
       {
@@ -34,7 +51,12 @@ const UserWidget = ({ userId, picturePath }) => {
     const user = await response.data.user;
     setUser(user);
   };
-  
+  const HandlerManagerClick = async ()=>{
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     getUser();
@@ -45,17 +67,19 @@ const UserWidget = ({ userId, picturePath }) => {
   }
 
   const {
+    _id,
     firstName,
     lastName,
     address,
-    // occupation,
-    // viewedProfile,
-    // impressions,
+    avatarURL,
+    email,
     friends,
   } = user;
 
   return (
-    <WidgetWrapper>
+    <WidgetWrapper
+      // sx={{ border: 1 }}
+    >
       {/* FIRST ROW */}
       <FlexBetween
         gap="0.5rem"
@@ -81,7 +105,30 @@ const UserWidget = ({ userId, picturePath }) => {
             <Typography color={medium}>{friends.length} friends</Typography>
           </Box>
         </FlexBetween>
-        <ManageAccountsOutlined />
+        {isMyself &&
+          <>
+            <IconButton onClick={()=>HandlerManagerClick()}>
+              <ManageAccountsOutlined />
+            </IconButton>
+            <Modal
+              open={open}
+              onClose={handleClose}
+            >
+              {isNonMobileScreens ? 
+                (
+                <Box sx={{ ...style, width: 1/2 }}>
+                  <ManageAccount handleClose={handleClose} user={user}/>
+                </Box>
+                ):(
+                <Box sx={{ ...style, width: 3/4, height: 3/4, overflow: 'auto'}}>
+                  <ManageAccount handleClose={handleClose} user={user}/>
+                </Box>
+                )
+              }
+            </Modal>
+          </>
+        }
+        
       </FlexBetween>
 
       <Divider />
@@ -100,21 +147,7 @@ const UserWidget = ({ userId, picturePath }) => {
 
       <Divider />
 
-      {/* THIRD ROW */}
-      {/* <Box p="1rem 0">
-        <FlexBetween mb="0.5rem">
-          <Typography color={medium}>Who&apos;s viewed your profile</Typography>
-          <Typography color={main} fontWeight="500">
-            {viewedProfile}
-          </Typography>
-        </FlexBetween>
-        <FlexBetween>
-          <Typography color={medium}>Impressions of your post</Typography>
-          <Typography color={main} fontWeight="500">
-            {impressions}
-          </Typography>
-        </FlexBetween>
-      </Box> */}
+      
 
       <Divider />
 
@@ -126,7 +159,7 @@ const UserWidget = ({ userId, picturePath }) => {
 
         <FlexBetween gap="1rem" mb="0.5rem">
           <FlexBetween gap="1rem">
-            <img src={`${host}/assets/twitter.png`} alt="twitter" />
+            <img src={'https://res.cloudinary.com/dckxgux3k/image/upload/v1690193978/twitter_w6vnyz.png'} alt="twitter" />
             <Box>
               <Typography color={main} fontWeight="500">
                 Twitter
@@ -139,7 +172,7 @@ const UserWidget = ({ userId, picturePath }) => {
 
         <FlexBetween gap="1rem">
           <FlexBetween gap="1rem">
-            <img src={`${host}/assets/linkedin.png`} alt="linkedin" />
+            <img src={'https://res.cloudinary.com/dckxgux3k/image/upload/v1690193978/linkedin_djwhtg.png'} alt="linkedin" />
             <Box>
               <Typography color={main} fontWeight="500">
                 Linkedin

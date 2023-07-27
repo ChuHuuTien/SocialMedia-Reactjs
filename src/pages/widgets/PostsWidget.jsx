@@ -12,7 +12,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   const token = useSelector((state) => state.token);
 
   const getPosts = async () => {
-    const response = await axios.get(`${host}/post/news/?page=${0}&limit=${10}`,
+    const response = await axios.get(`${host}/post/news/?page=${0}&limit=${20}`,
       {
         headers: { Authorization: `${token}` },
       }
@@ -22,7 +22,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   };
 
   const getUserPosts = async () => {
-    const response = await axios.get(`${host}/post/all/${userId}/?page=${0}&limit=${10}`,
+    const response = await axios.get(`${host}/post/all/${userId}/?page=${0}&limit=${20}`,
       {
         headers: { Authorization: `${token}` },
       }
@@ -63,6 +63,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
             userPicturePath={postedByUser.avatarURL}
             likesByUsers={likesByUsers}
             // comments={comments}
+            isProfile={isProfile}
           />
         )
       )}

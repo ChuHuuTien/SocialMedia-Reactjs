@@ -1,7 +1,7 @@
 import { Typography, useTheme } from "@mui/material";
 import FlexBetween from "../../Components/FlexBetween";
 import WidgetWrapper from "../../Components/WidgetWrapper";
-import { host } from "../../utils/APIRoutes";
+// import { host } from "../../utils/APIRoutes";
 
 const AdvertWidget = () => {
   const { palette } = useTheme();
@@ -21,7 +21,7 @@ const AdvertWidget = () => {
         width="100%"
         height="auto"
         alt="advert"
-        src={`${host}/assets/Shopee.jpg`}
+        src={'https://res.cloudinary.com/dckxgux3k/image/upload/v1690193977/Shopee_vtmyvy.jpg'}
         style={{ borderRadius: "0.75rem", margin: "0.75rem 0" }}
       />
       <FlexBetween>

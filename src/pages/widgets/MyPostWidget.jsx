@@ -31,7 +31,7 @@ import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 import { useEffect } from "react";
 
-const MyPostWidget = ({ picturePath }) => {
+const MyPostWidget = ({ picturePath, isMyself }) => {
   const dispatch = useDispatch();
   const [isImage, setIsImage] = useState(false);
   const [image, setImage] = useState(null);
@@ -68,13 +68,24 @@ const MyPostWidget = ({ picturePath }) => {
         headers: { Authorization: `${token}` },
       }
     )
-    const response = await axios.get(`${host}/post/news/?page=${0}&limit=${20}`,
-      {
-        headers: { Authorization: `${token}` },
-      }
-    )
-    const posts = await response.data.news;
-    dispatch(setPosts({posts: posts}));
+    if(isMyself){
+      const response = await axios.get(`${host}/post/all/${userid}/?page=${0}&limit=${20}`,
+          {
+            headers: { Authorization: `${token}` },
+          }
+        )
+      const posts = await response.data.posts;
+      dispatch(setPosts({posts: posts}));
+    }else{
+      const response = await axios.get(`${host}/post/news/?page=${0}&limit=${20}`,
+        {
+          headers: { Authorization: `${token}` },
+        }
+      )
+      const posts = await response.data.news;
+      dispatch(setPosts({posts: posts}));
+    }
+    
     setImage(null);
     setPost("");
   };
@@ -123,24 +134,24 @@ const MyPostWidget = ({ picturePath }) => {
                   border={`2px dashed ${palette.primary.main}`}
                   p="1rem"
                   width="100%"
-                  sx={{ "&:hover": { cursor: "pointer" } }}
+                  sx={{ 
+                    "&:hover": { cursor: "pointer" },
+                    height: 2/3,
+                    width: 2/3,
+                  }}
                 >
                   <input {...getInputProps()} />
                   {!image ? (
                     <p>Add Image Here</p>
                   ) : (
                     <FlexBetween>
-                      {/* <Typography noWrap={true}>
-                        {image.name}
-                      </Typography>
-                      <EditOutlined /> */}
                       <Box
                         component="img"
                         sx={{
-                          height: 233,
-                          width: 350,
-                          maxHeight: { xs: 150, md: 233 },
-                          maxWidth: { xs: 200, md: 350 },
+                          height: 1,
+                          width: 1,
+                          // maxHeight: { xs: 200, md: 233 },
+                          // maxWidth: { xs: 200, md: 350 },
                         }}
                         alt={image.name}
                         src={image.preview}
