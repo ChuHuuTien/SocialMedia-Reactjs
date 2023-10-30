@@ -6,13 +6,13 @@ import { List, ListItem, ListItemButton, ListItemIcon, ListItemText} from "@mui/
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setFriends } from "../state";
-import FlexBetween from "./FlexBetween";
-import UserImage from "./UserImage";
-import { host } from "../utils/APIRoutes";
+import { setFriends } from "../../state";
+import FlexBetween from "../FlexBetween";
+import UserImage from "../UserImage";
+import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 
-const Friend = ({ friendId, name, userPicturePath }) => {
+const UserSearch = ({ userId, name, userPicturePath }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
@@ -22,12 +22,13 @@ const Friend = ({ friendId, name, userPicturePath }) => {
   const primaryLight = palette.primary.light;
   const primaryDark = palette.primary.dark;
   const main = palette.neutral.main;
-  const isFriend = friends.find((friend) => friend._id === friendId);
-  const isNotMyself = friendId !== userid;
+  const isFriend = friends.find((friend) => friend._id === userId);
+  const isNotMyself = userId !== userid;
+  
   const patchFriend = async () => {
     const response = await axios.post(`${host}/user/updatefriend`,
       {
-        friendid: friendId
+        friendid: userId,
       },
       {
         headers: { Authorization: `${token}` },
@@ -37,18 +38,18 @@ const Friend = ({ friendId, name, userPicturePath }) => {
     dispatch(setFriends({friends: friends}));
   };
   return (
-    <FlexBetween>
+    <FlexBetween padding="5px 0px">
       <FlexBetween gap="1rem">
-        <UserImage image={userPicturePath} size="55px" />
+        <UserImage image={userPicturePath} size="35px" />
         <Box
           onClick={() => {
-            navigate(`/profile/${friendId}`);
+            navigate(`/profile/${userId}`);
             navigate(0);
           }}
         >
           <Typography
             color={main}
-            variant="h5"
+            variant="h6"
             fontWeight="500"
             sx={{
               "&:hover": {
@@ -65,7 +66,11 @@ const Friend = ({ friendId, name, userPicturePath }) => {
         isNotMyself ? (
           <IconButton
             onClick={() => patchFriend()}
-            sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+            sx={{ 
+              backgroundColor: primaryLight, 
+              p: "0.5rem",
+              size: 10
+            }}
           >
             {isFriend ? (
               <PersonRemoveOutlined sx={{ color: primaryDark }} />
@@ -75,14 +80,8 @@ const Friend = ({ friendId, name, userPicturePath }) => {
           </IconButton>
         ) :( 
           <>
-            {/* <IconButton
-              onClick={(e) => handelSetting(e)}
-              sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
-            >
-              <Settings sx={{ color: primaryDark }} />
-            </IconButton> */}
+            
           </>
-          
         )
       }
       
@@ -90,4 +89,4 @@ const Friend = ({ friendId, name, userPicturePath }) => {
   );
 };
 
-export default Friend;
+export default UserSearch;

@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect } from "react";
+import { Box } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "../../state";
 import PostWidget from "./PostWidget";
@@ -10,7 +11,6 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state) => state.posts);
   const token = useSelector((state) => state.token);
-
   const getPosts = async () => {
     const response = await axios.get(`${host}/post/news/?page=${0}&limit=${20}`,
       {
@@ -46,25 +46,27 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           _id,
           creatorId,
           content,
-          picturePath,
+          imageSrcs,
           createdAt,
           postedByUser,
           likesByUsers,
-          // comments,
+          commentLength,
         }) => (
-          <PostWidget
-            key={_id}
-            postId={_id}
-            postUserId={creatorId}
-            name={`${postedByUser.firstName} ${postedByUser.lastName}`}
-            content={content}
-            picturePath={picturePath}
-            createdAt={createdAt}
-            userPicturePath={postedByUser.avatarURL}
-            likesByUsers={likesByUsers}
-            // comments={comments}
-            isProfile={isProfile}
-          />
+          <Box m="2rem 0" sx={{boxShadow: 5, borderRadius: "10px"}} key={_id} >
+            <PostWidget
+              
+              postId={_id}
+              postUserId={creatorId}
+              name={`${postedByUser.firstName} ${postedByUser.lastName}`}
+              content={content}
+              imageSrcs={imageSrcs}
+              createdAt={createdAt}
+              userPicturePath={postedByUser.avatarURL}
+              likesByUsers={likesByUsers}
+              commentLength={commentLength}
+              isProfile={isProfile}
+            />
+          </Box>
         )
       )}
     </>

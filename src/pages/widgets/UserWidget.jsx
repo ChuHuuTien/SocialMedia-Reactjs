@@ -5,6 +5,7 @@ import {
   EditOutlined,
   LocationOnOutlined,
   WorkOutlineOutlined,
+  Email
 } from "@mui/icons-material";
 import { Box, Typography, Divider, useTheme, IconButton, Modal, useMediaQuery } from "@mui/material";
 import UserImage from "../../Components/UserImage";
@@ -27,7 +28,6 @@ const UserWidget = ({ userId, picturePath, isMyself }) => {
   const medium = palette.neutral.medium;
   const main = palette.neutral.main;
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
-
   const style = {
     position: 'absolute',
     top: '50%',
@@ -120,7 +120,7 @@ const UserWidget = ({ userId, picturePath, isMyself }) => {
                   <ManageAccount handleClose={handleClose} user={user}/>
                 </Box>
                 ):(
-                <Box sx={{ ...style, width: 3/4, height: 3/4, overflow: 'auto'}}>
+                <Box sx={{ ...style, width: 1, height: 3/4, overflow: 'auto'}}>
                   <ManageAccount handleClose={handleClose} user={user}/>
                 </Box>
                 )
@@ -154,33 +154,20 @@ const UserWidget = ({ userId, picturePath, isMyself }) => {
       {/* FOURTH ROW */}
       <Box p="1rem 0">
         <Typography fontSize="1rem" color={main} fontWeight="500" mb="1rem">
-          Social Profiles
+          Thông tin
         </Typography>
 
         <FlexBetween gap="1rem" mb="0.5rem">
           <FlexBetween gap="1rem">
-            <img src={'https://res.cloudinary.com/dckxgux3k/image/upload/v1690193978/twitter_w6vnyz.png'} alt="twitter" />
+            <Email fontSize="large" sx={{ color: main }} />
             <Box>
               <Typography color={main} fontWeight="500">
-                Twitter
+                Email
               </Typography>
-              <Typography color={medium}>Social Network</Typography>
+              <Typography color={medium}>{email}</Typography>
             </Box>
           </FlexBetween>
-          <EditOutlined sx={{ color: main }} />
-        </FlexBetween>
-
-        <FlexBetween gap="1rem">
-          <FlexBetween gap="1rem">
-            <img src={'https://res.cloudinary.com/dckxgux3k/image/upload/v1690193978/linkedin_djwhtg.png'} alt="linkedin" />
-            <Box>
-              <Typography color={main} fontWeight="500">
-                Linkedin
-              </Typography>
-              <Typography color={medium}>Network Platform</Typography>
-            </Box>
-          </FlexBetween>
-          <EditOutlined sx={{ color: main }} />
+          {/* <EditOutlined sx={{ color: main }} /> */}
         </FlexBetween>
       </Box>
     </WidgetWrapper>

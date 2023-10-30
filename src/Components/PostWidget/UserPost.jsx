@@ -1,25 +1,24 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { PersonAddOutlined, PersonRemoveOutlined, Settings, Delete, DriveFileRenameOutline } from "@mui/icons-material";
-import { Box, IconButton, Typography, useTheme, Popper, ClickAwayListener} from "@mui/material";
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
+import { Box, IconButton, Typography, useTheme, Popper, ClickAwayListener, 
+  List, ListItem, ListItemButton, ListItemIcon, ListItemText, Modal, useMediaQuery} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setFriends, setPosts } from "../state";
-import FlexBetween from "./FlexBetween";
-import UserImage from "./UserImage";
-import { host } from "../utils/APIRoutes";
+import { setFriends, setPosts } from "../../state";
+import FlexBetween from "../FlexBetween";
+import UserImage from "../UserImage";
+import { host } from "../../utils/APIRoutes";
 import axios from "axios";
-import zIndex from "@mui/material/styles/zIndex";
 
-const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfile }) => {
+const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfile  }) => {
   if(createdAt){
     // eslint-disable-next-line no-inner-declarations
     function dateFormat(date) {
       const month = date.getMonth();
       const day = date.getDate();
-      const monthString = month >= 10 ? month : `0${month+1}`;
+      const monthString = month >= 9 ? month+1 : `0${month+1}`;
       const dayString = day >= 10 ? day : `0${day}`;
       return `${date.getHours()}h:${date.getMinutes()}m ${dayString}-${monthString}-${date.getFullYear()}`;
     }
@@ -31,6 +30,8 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   const open = Boolean(popperAnc);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [openPost, setOpenPost] = useState(false);
+
   const token = useSelector((state) => state.token);
   const friends = useSelector((state) => state.user.friends);
   const { userid } = useSelector((state) => state.user);
@@ -41,6 +42,23 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   const medium = palette.neutral.medium;
   const isFriend = friends.find((friend) => friend._id === friendId);
   const isNotMyself = friendId !== userid;
+  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '1px solid #ccc!important',
+    borderRadius: '25px',
+    boxShadow: 24,
+    pt: 2,
+    px: 4,
+    pb: 3,
+  };
+
   const patchFriend = async () => {
     const response = await axios.post(`${host}/user/updatefriend`,
       {
@@ -56,8 +74,13 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   const handelSetting = async (e) => {
     setPopperAnc(e.currentTarget);
   };
+  const HandlerManagerClick = async ()=>{
+    setOpenPost(true);
+  };
+  const handleClose = () => {
+    setOpenPost(false);
+  };
   const handelDelete = async ()=>{
-    console.log(postId);
     await axios.delete(`${host}/post/${postId}`,
       {
         headers: { Authorization: `${token}` },
@@ -134,8 +157,8 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
               anchorEl={popperAnc} 
               sx={{
                 border: "1px solid #333",
-                zIndex: 5,
-                backgroundColor: "#e6fbff",
+                zIndex: 1301,
+                backgroundColor: primaryLight,
               }}>
               <ClickAwayListener
                 onClickAway={() => {
@@ -144,12 +167,28 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
               >
                 <List >
                   <ListItem disablePadding>
-                    <ListItemButton >
+                    <ListItemButton onClick={()=>HandlerManagerClick()}>
                       <ListItemIcon>
                         <DriveFileRenameOutline />
                       </ListItemIcon>
                       <ListItemText primary="Sửa" />
                     </ListItemButton>
+                    {/* <Modal
+                      open={openPost}
+                      onClose={handleClose}
+                    >
+                      {isNonMobileScreens ? 
+                        (
+                        <Box sx={{ ...style, width: 1/2 }}>
+                          <ManagePost handleClose={handleClose} content={content} picturePath={picturePath}/>
+                        </Box>
+                        ):(
+                        <Box sx={{ ...style, width: 3/4, height: 3/4, overflow: 'auto'}}>
+                          <ManagePost handleClose={handleClose} content={content} picturePath={picturePath}/>
+                        </Box>
+                        )
+                      }
+                    </Modal> */}
                   </ListItem>
 
                   <ListItem disablePadding>

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -7,9 +7,10 @@ import {
   useMediaQuery,
   Typography,
   useTheme,
-  IconButton
+  IconButton,
+  Divider
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Google } from "@mui/icons-material";
 import axios from "axios";
 import { Formik } from "formik";
 import { ToastContainer,toast } from "react-toastify";
@@ -17,8 +18,6 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLogin, setFriends, setProfileFriends } from "../../state";
-import Dropzone from "react-dropzone";
-import FlexBetween from "../../Components/FlexBetween";
 import {host, loginRoute, registerRoute} from '../../utils/APIRoutes';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -72,7 +71,8 @@ const Form = () => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-
+  
+  
   const register = async (values, onSubmitProps) => {
     // this allows us to send form info with image
     const formData = new FormData();
@@ -94,6 +94,31 @@ const Form = () => {
     }
 
   };
+  const googleAuth = async () => {
+		window.open(
+			`${host}/auth/google/callback`,
+			"_self"
+		);
+	};
+
+	const getUserGoogle = async () => {
+		try {
+			const { response } = await axios.get(`${host}/auth/login/success`);
+      const data = response.data;
+      dispatch(
+        setLogin({
+          user: data.user,
+          token: data.accessToken,
+        })
+      );
+		} catch (error) {
+			toast.error(error.response.data.error, toastOptions);
+		}
+	};
+
+	useEffect(() => {
+		getUserGoogle();
+	}, []);
 
   const login = async (values, onSubmitProps) => {
     try{
@@ -175,39 +200,7 @@ const Form = () => {
                   helperText={touched.lastName && errors.lastName}
                   sx={{ gridColumn: "span 2" }}
                 />
-                {/* <Box
-                  gridColumn="span 4"
-                  border={`1px solid ${palette.neutral.medium}`}
-                  borderRadius="5px"
-                  p="1rem"
-                >
-                  <Dropzone
-                    acceptedFiles=".jpg,.jpeg,.png"
-                    multiple={false}
-                    onDrop={(acceptedFiles) =>
-                      setFieldValue("picture", acceptedFiles[0])
-                    }
-                  >
-                    {({ getRootProps, getInputProps }) => (
-                      <Box
-                        {...getRootProps()}
-                        border={`2px dashed ${palette.primary.main}`}
-                        p="1rem"
-                        sx={{ "&:hover": { cursor: "pointer" } }}
-                      >
-                        <input {...getInputProps()} />
-                        {!values.picture ? (
-                          <p>Add Picture Here</p>
-                        ) : (
-                          <FlexBetween>
-                            <Typography>{values.picture.name}</Typography>
-                            <EditOutlinedIcon />
-                          </FlexBetween>
-                        )}
-                      </Box>
-                    )}
-                  </Dropzone>
-                </Box> */}
+                
               </>
             )}
 
@@ -222,7 +215,7 @@ const Form = () => {
               sx={{ gridColumn: "span 4" }}
             />
             <TextField
-              label="Password"
+              label="Mật khẩu"
               type={showPassword ? 'text' : 'password'}
               onBlur={handleBlur}
               onChange={handleChange}
@@ -260,8 +253,36 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLogin ? "LOGIN" : "REGISTER"}
+              {isLogin ? "ĐĂNG NHẬP" : "ĐĂNG KÍ"}
             </Button>
+
+              {
+                isLogin && (
+                <>
+                    <Divider>
+                    HOẶC
+                  </Divider>
+
+                  <Button
+                    fullWidth
+                    onClick={googleAuth}
+                    sx={{
+                      m: "2rem 0",
+                      p: "1rem",
+                      gap: "1rem",
+                      backgroundColor: palette.primary.main,
+                      color: palette.background.alt,
+                      "&:hover": { color: palette.primary.main },
+                    }}
+                    >
+                    <Google/>
+                    { "ĐĂNG NHẬP VỚI GOOGLE" }
+                  </Button>
+                </>
+                )
+              }
+            
+
             <Typography
               onClick={() => {
                 setPageType(isLogin ? "register" : "login");
@@ -277,8 +298,8 @@ const Form = () => {
               }}
             >
               {isLogin
-                ? "Don't have an account? Sign Up here."
-                : "Already have an account? Login here."}
+                ? "Chưa có tài khoản? Đăng kí ở đây."
+                : "Đã có tài khoản? Đăng nhập."}
             </Typography>
           </Box>
         </form>

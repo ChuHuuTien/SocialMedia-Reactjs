@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Box, IconButton, InputBase, TextField, useMediaQuery, useTheme} from "@mui/material";
 import { Search } from "@mui/icons-material";
 import UserSearch from "./UserSearch";
-import { host } from "../utils/APIRoutes";
+import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 
 
@@ -57,7 +57,7 @@ const SearchBar = () => {
             disableUnderline: true,
           }}
           // {...getInputProps()} 
-          placeholder="Search..."
+          placeholder="Tìm kiếm..."
           sx={{
             width: isNonMobileScreens ? "300px" : "250px",
             

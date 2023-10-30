@@ -1,4 +1,4 @@
-// export const host = "https://chatapi-qrfr.onrender.com";
+// export const host = "https://social-media-2qwt.onrender.com";
 export const host = "http://localhost:3001";
 
 export const loginRoute = `${host}/auth/login`;

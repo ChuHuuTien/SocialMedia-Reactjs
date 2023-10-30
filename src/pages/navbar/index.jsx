@@ -21,11 +21,15 @@ import {
   Menu,
   Close,
 } from "@mui/icons-material";
+import axios from "axios";
+import { host } from "../../utils/APIRoutes";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "../../state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "../../Components/FlexBetween";
-import SearchBar from "../../Components/SearchBar";
+import SearchBar from "../../Components/Search/SearchBar";
+
+
 
 
 const Navbar = () => {
@@ -44,10 +48,13 @@ const Navbar = () => {
   const alt = theme.palette.background.alt;
 
   const fullName = `${user.firstName} ${user.lastName}`;
-
+  const Logout = async ()=>{
+    dispatch(setLogout());
+    await axios.get(`${host}/auth/logout`);
+  }
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
-      <FlexBetween gap="1.75rem">
+      <FlexBetween gap="0rem">
         <Typography
           fontWeight="bold"
           fontSize="clamp(1rem, 2rem, 2.25rem)"
@@ -59,8 +66,10 @@ const Navbar = () => {
               cursor: "pointer",
             },
           }}
+          padding={isNonMobileScreens? "0rem 1.5rem" : "0rem 1rem 0rem 0rem"}
+          
         >
-          {isNonMobileScreens? "Sociopedia" : "S"}
+          {isNonMobileScreens? "InstaShare" : "I"}
         </Typography>
         <FlexBetween
             backgroundColor={neutralLight}
@@ -117,9 +126,9 @@ const Navbar = () => {
                 <Typography>{fullName}</Typography>
               </MenuItem>
               <MenuItem onClick={() => navigate("/reset")}>
-                Change password
+                Đổi mật khẩu
               </MenuItem>
-              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
+              <MenuItem onClick={() => dispatch(setLogout())}>Đăng xuất</MenuItem>
             </Select>
           </FormControl>
         </FlexBetween>
@@ -199,10 +208,10 @@ const Navbar = () => {
                   <Typography>{fullName}</Typography>
                 </MenuItem>
                 <MenuItem onClick={() => navigate("/reset")}>
-                  Change password
+                  Đổi mật khẩu
                 </MenuItem>
-                <MenuItem onClick={() => dispatch(setLogout())}>
-                  Log Out
+                <MenuItem onClick={() => {Logout}}>
+                  Đăng xuất
                 </MenuItem>
               </Select>
             </FormControl>

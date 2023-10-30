@@ -13,7 +13,7 @@ const LoginPage = () => {
         textAlign="center"
       >
         <Typography fontWeight="bold" fontSize="32px" color="primary">
-          Sociopedia
+          InstaShare
         </Typography>
       </Box>
 
@@ -25,7 +25,7 @@ const LoginPage = () => {
         backgroundColor={theme.palette.background.alt}
       >
         <Typography fontWeight="500" variant="h5" sx={{ mb: "1.5rem" }}>
-          Chào mừng bạn đến với Socipedia, Mạng xã hội dành cho tất cả mọi người!
+          Chào mừng bạn đến với InstaShare, Mạng xã hội dành cho tất cả mọi người!
         </Typography>
         <Form />
       </Box>

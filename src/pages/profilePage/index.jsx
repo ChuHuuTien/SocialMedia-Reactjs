@@ -1,4 +1,5 @@
-import { Box, useMediaQuery } from "@mui/material";
+/* eslint-disable no-unused-vars */
+import { Box, useMediaQuery, Toolbar, AppBar,useScrollTrigger, Fade, Fab } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -7,10 +8,56 @@ import FriendListWidget from "../widgets/FriendListWidget";
 import MyPostWidget from "../widgets/MyPostWidget";
 import PostsWidget from "../widgets/PostsWidget";
 import UserWidget from "../widgets/UserWidget";
+import AdvertWidget from "../widgets/AdvertWidget";
 import { host } from "../../utils/APIRoutes";
 import axios from "axios";
+import PropTypes from 'prop-types';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+function ScrollTop(props) {
+  const { children, window } = props;
+  // Note that you normally won't need to set the window ref as useScrollTrigger
+  // will default to window.
+  // This is only being set here because the demo is in an iframe.
+  const trigger = useScrollTrigger({
+    target: window ? window() : undefined,
+    disableHysteresis: true,
+    threshold: 100,
+  });
 
-const ProfilePage = () => {
+  const handleClick = (event) => {
+    const anchor = (event.target.ownerDocument || document).querySelector(
+      '#back-to-top-anchor',
+    );
+
+    if (anchor) {
+      anchor.scrollIntoView({
+        block: 'center',
+      });
+    }
+  };
+
+  return (
+    <Fade in={trigger}>
+      <Box
+        onClick={handleClick}
+        role="presentation"
+        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+      >
+        {children}
+      </Box>
+    </Fade>
+  );
+}
+ScrollTop.propTypes = {
+  children: PropTypes.element.isRequired,
+  /**
+   * Injected by the documentation to work in an iframe.
+   * You won't need it on your project.
+   */
+  window: PropTypes.func,
+};
+
+const ProfilePage = (props) => {
   const [user, setUser] = useState(null);
   const [isMyself, setIsMyself] = useState(true);
   const { userId } = useParams();
@@ -41,7 +88,10 @@ const ProfilePage = () => {
 
   return (
     <Box>
-      <Navbar />
+      <AppBar>
+          <Navbar />
+      </AppBar>
+      <Toolbar id="back-to-top-anchor" />
       <Box
         width="100%"
         padding="2rem 6%"
@@ -50,21 +100,38 @@ const ProfilePage = () => {
         justifyContent="center"
       >
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <UserWidget userId={userId} picturePath={user.avatarURL} isMyself={isMyself}/>
+          <Box sx={{boxShadow: 5, borderRadius: "10px"}} >
+            <UserWidget userId={userId} picturePath={user.avatarURL} isMyself={isMyself}/>
+          </Box>
           <Box m="2rem 0" />
-          <FriendListWidget userId={userId} />
+          <Box sx={{boxShadow: 5, borderRadius: "10px"}} >
+            <FriendListWidget userId={userId} />
+
+          </Box>
         </Box>
         <Box
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          {isMyself && 
-            <MyPostWidget picturePath={user.avatarURL} isMyself={isMyself}/>
-          }
+          <Box sx={{boxShadow: 5, borderRadius: "10px"}} >
+            {isMyself && 
+              <MyPostWidget picturePath={user.avatarURL} isMyself={isMyself}/>
+            }
+          </Box>
           <Box m="2rem 0" />
           <PostsWidget userId={userId} isProfile />
         </Box>
+        {isNonMobileScreens && (
+          <Box flexBasis="26%">
+            {/* <AdvertWidget /> */}
+          </Box>
+        )}
       </Box>
+      <ScrollTop {...props}>
+        <Fab size="small" aria-label="scroll back to top">
+          <KeyboardArrowUpIcon />
+        </Fab>
+      </ScrollTop>
     </Box>
   );
 };
