@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import {
@@ -8,7 +9,8 @@ import {
   Typography,
   useTheme,
   IconButton,
-  Divider
+  Divider,
+  Grid
 } from "@mui/material";
 import { Visibility, VisibilityOff, Google } from "@mui/icons-material";
 import axios from "axios";
@@ -20,6 +22,8 @@ import { useDispatch } from "react-redux";
 import { setLogin, setFriends, setProfileFriends } from "../../state";
 import {host, loginRoute, registerRoute} from '../../utils/APIRoutes';
 import 'react-toastify/dist/ReactToastify.css';
+import { useGoogleLogin } from '@react-oauth/google'
+
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("Trống"),
@@ -94,31 +98,55 @@ const Form = () => {
     }
 
   };
-  const googleAuth = async () => {
-		window.open(
-			`${host}/auth/google/callback`,
-			"_self"
-		);
-	};
-
-	const getUserGoogle = async () => {
-		try {
-			const { response } = await axios.get(`${host}/auth/login/success`);
-      const data = response.data;
-      dispatch(
-        setLogin({
-          user: data.user,
-          token: data.accessToken,
+  
+// email: "chuhuutien0@gmail.com"
+// email_verified: true
+// family_name: "chu"
+// given_name: "tien"
+// locale: "vi"
+// name: "tien chu"
+// picture: "https://lh3.googleusercontent.com/a/ACg8ocIIYxDW5G1B6g81TeVMPVCxQH8GQPfUiGgbMZgjpm8j=s96-c"
+// sub: "113852049961266024610"
+  const googleLogin = useGoogleLogin({
+    onSuccess: async tokenResponse => {
+      // console.log(tokenResponse);
+      const userInfo = await axios
+        .get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         })
-      );
-		} catch (error) {
-			toast.error(error.response.data.error, toastOptions);
-		}
-	};
+        .then(res => res.data)
+        .catch((error)=>{console.log(error)})
 
-	useEffect(() => {
-		getUserGoogle();
-	}, []);
+      // console.log(userInfo);
+      try{
+        const response  = await axios.post(`${host}/auth/google`,{
+          usergoogle: userInfo
+        });
+        const data = response.data;
+        if (data) {
+          dispatch(
+            setLogin({
+              user: data.user,
+              token: data.accessToken,
+            })
+          );
+          const response = await axios.get(`${host}/user/${data.user.userid}/friends`, {
+            headers: { Authorization: data.accessToken },
+          })
+          const friends = await response.data.friends;
+          dispatch(setProfileFriends({friends: friends}));
+          dispatch(setFriends({friends: friends}));
+          navigate("/");
+        }
+      }catch(error){
+        console.log(error);
+        toast.error(error.response.data.error, toastOptions);
+      }
+    },
+    onError: errorResponse => console.log(errorResponse),
+
+  });
+
 
   const login = async (values, onSubmitProps) => {
     try{
@@ -262,10 +290,10 @@ const Form = () => {
                     <Divider>
                     HOẶC
                   </Divider>
-
+                  
                   <Button
                     fullWidth
-                    onClick={googleAuth}
+                    onClick={googleLogin}
                     sx={{
                       m: "2rem 0",
                       p: "1rem",
@@ -278,29 +306,58 @@ const Form = () => {
                     <Google/>
                     { "ĐĂNG NHẬP VỚI GOOGLE" }
                   </Button>
+                  
                 </>
                 )
               }
-            
-
-            <Typography
-              onClick={() => {
-                setPageType(isLogin ? "register" : "login");
-                resetForm();
-              }}
+            <Box 
               sx={{
-                textDecoration: "underline",
-                color: palette.primary.main,
-                "&:hover": {
-                  cursor: "pointer",
-                  color: palette.primary.light,
-                },
-              }}
-            >
-              {isLogin
-                ? "Chưa có tài khoản? Đăng kí ở đây."
-                : "Đã có tài khoản? Đăng nhập."}
-            </Typography>
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}
+            >  
+              
+              <Typography
+                align="left"
+                display={"inline"}
+                onClick={() => {
+                  setPageType(isLogin ? "register" : "login");
+                  resetForm();
+                }}
+                sx={{
+                  textDecoration: "underline",
+                  color: palette.primary.main,
+                  "&:hover": {
+                    cursor: "pointer",
+                    color: palette.primary.light,
+                  },
+                }}
+                
+              >
+                {isLogin
+                  ? "Chưa có tài khoản? Đăng kí ở đây."
+                  : "Đã có tài khoản? Đăng nhập."}
+              </Typography>
+                  
+              <Typography
+                margin="0 0 0 auto"
+
+                align="right"
+                display={"inline"}
+                onClick={() => navigate("/forgot")}
+                sx={{
+                  textDecoration: "underline",
+                  color: palette.primary.main,
+                  "&:hover": {
+                    cursor: "pointer",
+                    color: palette.primary.light,
+                  },
+                }}
+              >
+                Quên mật khẩu
+              </Typography>
+            </Box>
           </Box>
         </form>
       )}

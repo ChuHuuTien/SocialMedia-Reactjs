@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import Form from "./Form";
 
-const Reset = () => {
+const Forgot = () => {
   const theme = useTheme();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   return (
@@ -25,7 +25,7 @@ const Reset = () => {
         backgroundColor={theme.palette.background.alt}
       >
         <Typography fontWeight="500" variant="h5" sx={{ mb: "1.5rem" }}>
-          Đổi mật khẩu
+          Lấy lại mật khẩu
         </Typography>
         <Form />
       </Box>
@@ -33,4 +33,4 @@ const Reset = () => {
   );
 };
 
-export default Reset;
+export default Forgot;

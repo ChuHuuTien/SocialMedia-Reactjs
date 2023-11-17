@@ -3,19 +3,18 @@
 
 // import * as React from 'react';
 import useAutocomplete from '@mui/base/useAutocomplete';
-import { styled } from '@mui/system';
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useEffect } from "react";
 import { Box, IconButton, InputBase, TextField, useMediaQuery, useTheme} from "@mui/material";
 import { Search } from "@mui/icons-material";
 import UserSearch from "./UserSearch";
-import { host } from "../../utils/APIRoutes";
-import axios from "axios";
 
 
 const SearchBar = () => {
-  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const isNonMobileScreens = useMediaQuery("(min-width: 820px)");
   const theme = useTheme();
+  const alt = theme.palette.background.alt;
+  const primary = theme.palette.primary.main;
+  const neutralLight = theme.palette.neutral.light;
   const friends = useSelector((state) => state.user.friends);
   const {
     getRootProps,
@@ -29,8 +28,16 @@ const SearchBar = () => {
   });
 
   return (
-    <Box>
-      <Box {...getRootProps()}>
+    <Box 
+      bgcolor= {neutralLight}
+      padding="10px 20px"
+      borderRadius="9px"
+      margin="10px"
+    >
+      <Box 
+        {...getRootProps()}
+        
+      >
         <TextField
           inputProps={{ 
             ...getInputProps()
@@ -40,9 +47,10 @@ const SearchBar = () => {
             disableUnderline: true,
           }}
           // {...getInputProps()} 
-          placeholder="Search..."
+          placeholder="Tìm kiếm phòng..."
           sx={{
-            width: isNonMobileScreens ? "300px" : "250px",
+            // width: isNonMobileScreens ? "100%" : "250px",
+            width: isNonMobileScreens ? "100%" : "100%",
             
           }}
           variant="standard"
@@ -52,12 +60,21 @@ const SearchBar = () => {
         <Box 
           sx={{
             width: isNonMobileScreens ? "300px" : "250px",
-            height: "600px",
             backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#000',
             overflow: "auto",
             maxHeight: "250px",
             position: "fixed",
             zIndex: "5",
+            border: '1px solid #ccc!important',
+            borderRadius: '0px 0px 10px 10px',
+            '::-webkit-scrollbar': {
+              width: '0.4em'
+            },
+            '::-webkit-scrollbar-thumb':{
+              borderRadius:'10px',
+              bgcolor: primary
+              // bgcolor: theme.palette.mode === 'light' ? '#fff' : '#000',
+            }
           }}
         {...getListboxProps()}>
           {groupedOptions.map((option, index) => (

@@ -6,6 +6,7 @@ const initialState = {
   token: null,
   profilefriends: null,
   posts: [],
+  friendrequest: []
 };
 
 export const authSlice = createSlice({
@@ -45,9 +46,12 @@ export const authSlice = createSlice({
       });
       state.posts = updatedPosts;
     },
+    setFriendrequest: (state, action) => {
+      state.friendrequest = action.payload.friendrequest;
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost, setProfileFriends } =
+export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost, setProfileFriends, setFriendrequest } =
   authSlice.actions;
 export default authSlice.reducer;

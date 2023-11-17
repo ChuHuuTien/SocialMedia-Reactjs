@@ -1,6 +1,8 @@
+/* eslint-disable no-const-assign */
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { PersonAddOutlined, PersonRemoveOutlined, Settings, Delete, DriveFileRenameOutline } from "@mui/icons-material";
+import { PersonAddOutlined, PersonRemoveOutlined, Settings, Delete, DriveFileRenameOutline, HourglassTop, Close } from "@mui/icons-material";
 import { Box, IconButton, Typography, useTheme, Popper, ClickAwayListener, 
   List, ListItem, ListItemButton, ListItemIcon, ListItemText, Modal, useMediaQuery} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,26 +13,15 @@ import FlexBetween from "../FlexBetween";
 import UserImage from "../UserImage";
 import { host } from "../../utils/APIRoutes";
 import axios from "axios";
+import DeleteFriend from "../ConfirmDelete/DeleteFriend";
 
-const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfile  }) => {
-  if(createdAt){
-    // eslint-disable-next-line no-inner-declarations
-    function dateFormat(date) {
-      const month = date.getMonth();
-      const day = date.getDate();
-      const monthString = month >= 9 ? month+1 : `0${month+1}`;
-      const dayString = day >= 10 ? day : `0${day}`;
-      return `${date.getHours()}h:${date.getMinutes()}m ${dayString}-${monthString}-${date.getFullYear()}`;
-    }
-    createdAt = new Date(createdAt); 
-    createdAt = dateFormat(createdAt);
-  }
+const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfile, handleUpdate, isLoading  }) => {
+  
 
   const [popperAnc, setPopperAnc] = useState(null);
   const open = Boolean(popperAnc);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [openPost, setOpenPost] = useState(false);
 
   const token = useSelector((state) => state.token);
   const friends = useSelector((state) => state.user.friends);
@@ -42,24 +33,40 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   const medium = palette.neutral.medium;
   const isFriend = friends.find((friend) => friend._id === friendId);
   const isNotMyself = friendId !== userid;
-  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const [openDelete, setOpenDelete] = useState(false);
 
-  const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '1px solid #ccc!important',
-    borderRadius: '25px',
-    boxShadow: 24,
-    pt: 2,
-    px: 4,
-    pb: 3,
+  function Format(date) {
+    const now = new Date(Date.now());
+    date = new Date(date)
+    const time = new Date(now - date);
+    const second = date.getSeconds();
+    const minute = date.getMinutes();
+    const hour = date.getHours();
+    if(time.getMonth() <= 1){
+      if(time.getDate() <=1){
+        if(hour == now.getHours()){
+          if(minute == now.getMinutes()){
+            if(now.getSeconds() - second <= 0) return 'bây giờ'
+            else return `${now.getSeconds() - second} giây trước`
+          } return `${now.getMinutes() - minute} phút trước`
+        } return `${now.getHours() - hour} giờ trước`
+      }else return `${time.getDate()} ngày trước`
+    }else return `${time.getMonth()} tháng trước`
+  }
+  
+  const [load, setLoad] = useState(false);
+  const addFriend = async () => {
+    const response = await axios.post(`${host}/user/updatefriend`,
+      {
+        friendid: friendId
+      },
+      {
+        headers: { Authorization: `${token}` },
+      }
+    )
+    setLoad(true);
   };
-
-  const patchFriend = async () => {
+  const removeFriend = async () => {
     const response = await axios.post(`${host}/user/updatefriend`,
       {
         friendid: friendId
@@ -73,12 +80,19 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   };
   const handelSetting = async (e) => {
     setPopperAnc(e.currentTarget);
+
   };
-  const HandlerManagerClick = async ()=>{
-    setOpenPost(true);
+
+  const HandleUpdate = async ()=>{
+    handleUpdate();
+    setPopperAnc(null)
   };
-  const handleClose = () => {
-    setOpenPost(false);
+  const HandelOpenDelete = async ()=>{
+    setOpenDelete(true)
+    setPopperAnc(null);
+  };
+  const handleCloseDelete = async ()=>{
+    setOpenDelete(false);
   };
   const handelDelete = async ()=>{
     await axios.delete(`${host}/post/${postId}`,
@@ -128,22 +142,47 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
             {name}
           </Typography>
           <Typography color={medium} fontSize="0.75rem">
-            {createdAt}
+            {Format(createdAt)}
           </Typography>
         </Box>
       </FlexBetween>
       {
         isNotMyself ? (
-          <IconButton
-            onClick={() => patchFriend()}
-            sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
-          >
-            {isFriend ? (
-              <PersonRemoveOutlined sx={{ color: primaryDark }} />
-            ) : (
-              <PersonAddOutlined sx={{ color: primaryDark }} />
-            )}
-          </IconButton>
+            <div>
+              {isFriend && !isLoading && (
+              <IconButton
+                onClick={() => removeFriend()}
+                sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+              >
+                <PersonRemoveOutlined sx={{ color: primaryDark }} />
+              </IconButton>
+              )}
+              {!isFriend && !isLoading && !load && (
+                <IconButton
+                  onClick={() => addFriend()}
+                  sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+                >
+                <PersonAddOutlined sx={{ color: primaryDark }} />
+              </IconButton>
+              )}
+              {!isFriend && isLoading && !load && (
+                <IconButton
+                  disabled={true}
+                  sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+                  >
+                  <HourglassTop sx={{ color: primaryDark}} />
+                </IconButton>
+              )}
+              {!isFriend && !isLoading && load && (
+                <IconButton
+                  disabled={true}
+                  sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+                  >
+                  <HourglassTop sx={{ color: primaryDark}} />
+                </IconButton>
+              )}
+            </div>
+
         ) :( 
           <>
             <IconButton
@@ -155,51 +194,42 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
             <Popper 
               open={open} 
               anchorEl={popperAnc} 
+              placement={'bottom-end'}
               sx={{
                 border: "1px solid #333",
                 zIndex: 1301,
                 backgroundColor: primaryLight,
               }}>
+              
               <ClickAwayListener
                 onClickAway={() => {
                   setPopperAnc(null);
                 }}
               >
-                <List >
+
+                <List sx={{padding: 0}}>
                   <ListItem disablePadding>
-                    <ListItemButton onClick={()=>HandlerManagerClick()}>
+                    <ListItemButton onClick={(e)=>HandleUpdate(e)}>
                       <ListItemIcon>
                         <DriveFileRenameOutline />
                       </ListItemIcon>
                       <ListItemText primary="Sửa" />
                     </ListItemButton>
-                    {/* <Modal
-                      open={openPost}
-                      onClose={handleClose}
-                    >
-                      {isNonMobileScreens ? 
-                        (
-                        <Box sx={{ ...style, width: 1/2 }}>
-                          <ManagePost handleClose={handleClose} content={content} picturePath={picturePath}/>
-                        </Box>
-                        ):(
-                        <Box sx={{ ...style, width: 3/4, height: 3/4, overflow: 'auto'}}>
-                          <ManagePost handleClose={handleClose} content={content} picturePath={picturePath}/>
-                        </Box>
-                        )
-                      }
-                    </Modal> */}
                   </ListItem>
-
+                  <hr style={{margin: "0"}}/>
                   <ListItem disablePadding>
                     <ListItemButton onClick={()=>handelDelete()}>
+                    {/* <ListItemButton onClick={()=>HandelOpenDelete()}> */}
                       <ListItemIcon>
                         <Delete />
                       </ListItemIcon>
                       <ListItemText primary="Xoá" />
                     </ListItemButton>
+                    
                   </ListItem>
                 </List>
+               
+
               </ClickAwayListener>
             </Popper>
           </>

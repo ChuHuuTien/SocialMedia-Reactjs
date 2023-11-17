@@ -41,14 +41,6 @@ const UserSearch = ({ userId, name, userPicturePath }) => {
     }else{
       navigate("/message");
       navigate(0);
-
-      // const response = await axios.get(`${host}/room`,{
-      //   headers: {
-      //     Authorization: token
-      //   },
-      // });
-      // setRooms(response.data.conversation);
-      // handleRoomClick(chatRoom.chatRoomId);
     }
   };
 

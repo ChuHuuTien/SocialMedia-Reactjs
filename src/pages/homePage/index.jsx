@@ -5,7 +5,6 @@ import Navbar from "../navbar";
 import UserWidget from "../widgets/UserWidget";
 import MyPostWidget from "../widgets/MyPostWidget";
 import PostsWidget from "../widgets/PostsWidget";
-import AdvertWidget from "../widgets/AdvertWidget";
 import SuggestWidget from "../widgets/SuggestWidget";
 import FriendListWidget from "../widgets/FriendListWidget";
 import PropTypes from 'prop-types';
@@ -13,9 +12,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 function ScrollTop(props) {
   const { children, window } = props;
-  // Note that you normally won't need to set the window ref as useScrollTrigger
-  // will default to window.
-  // This is only being set here because the demo is in an iframe.
   const trigger = useScrollTrigger({
     target: window ? window() : undefined,
     disableHysteresis: true,
@@ -39,7 +35,7 @@ function ScrollTop(props) {
       <Box
         onClick={handleClick}
         role="presentation"
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+        sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 10 }}
       >
         {children}
       </Box>
@@ -48,10 +44,6 @@ function ScrollTop(props) {
 }
 ScrollTop.propTypes = {
   children: PropTypes.element.isRequired,
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
   window: PropTypes.func,
 };
 
@@ -93,7 +85,7 @@ const HomePage = (props) => {
         {isNonMobileScreens && (
           <Box flexBasis="26%" >
             <Box sx={{boxShadow: 5, borderRadius: "10px", marginTop :"0"}} > 
-             <SuggestWidget />
+             <SuggestWidget userId={userid}/>
             </Box>
               
           </Box>

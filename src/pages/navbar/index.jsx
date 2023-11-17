@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   IconButton,
@@ -10,6 +10,8 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
+  Avatar,
+  Modal
 } from "@mui/material";
 import {
   Search,
@@ -21,15 +23,16 @@ import {
   Menu,
   Close,
 } from "@mui/icons-material";
-import axios from "axios";
-import { host } from "../../utils/APIRoutes";
 import { useDispatch, useSelector } from "react-redux";
-import { setMode, setLogout } from "../../state";
+import { setMode, setLogout, setFriendrequest } from "../../state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "../../Components/FlexBetween";
 import SearchBar from "../../Components/Search/SearchBar";
-
-
+import FriendRequest from "../../Components/FriendList/FriendRequest";
+import { googleLogout } from '@react-oauth/google';
+import axios from "axios";
+import { host } from "../../utils/APIRoutes";
+import { set } from "date-fns";
 
 
 const Navbar = () => {
@@ -37,7 +40,10 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
-  
+  const [open, setOpen] = useState(false);
+  const token = useSelector((state) => state.token);
+  const friendrequest = useSelector((state) => state.friendrequest);
+
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
 
   const theme = useTheme();
@@ -50,8 +56,45 @@ const Navbar = () => {
   const fullName = `${user.firstName} ${user.lastName}`;
   const Logout = async ()=>{
     dispatch(setLogout());
-    await axios.get(`${host}/auth/logout`);
+    googleLogout();
   }
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    height: "75%",
+    transform: 'translate(-50%, -50%)',
+    bgcolor: 'background.paper',
+    border: '1px solid #ccc!important',
+    borderRadius: '25px',
+    boxShadow: 24,
+    pt: 2,
+    px: 2,
+    pb: 2,
+  };
+  const handleNotification = ()=>{
+    setOpen(true);
+  }
+  const handleCloseRequest = () => {
+    setOpen(false);
+    window.location.reload();
+  };
+  const [myRequest, setMyRequest] = useState([]);
+  const getFriendRequests = async () => {
+    const response = await axios.get(`${host}/user/friend/request`, {
+      headers: { Authorization: `${token}` },
+    })
+    dispatch(setFriendrequest({ friendrequest: response.data.friendrequest }));
+
+    const res = await axios.get(`${host}/user/friend/myrequest`, {
+      headers: { Authorization: `${token}` },
+    })
+    setMyRequest(res.data.myRequest);
+  };
+  useEffect(() => {
+    getFriendRequests();
+  }, []);
+
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
       <FlexBetween gap="0rem">
@@ -66,10 +109,12 @@ const Navbar = () => {
               cursor: "pointer",
             },
           }}
-          padding={isNonMobileScreens? "0rem 1.5rem" : "0rem 1rem 0rem 0rem"}
+          padding={isNonMobileScreens? "0rem 1.5rem" : "0rem 0.5rem 0rem 0rem"}
           
         >
-          {isNonMobileScreens? "InstaShare" : "I"}
+          {/* {isNonMobileScreens? "InstaShare" : "I"} */}
+          {isNonMobileScreens? "InstaShare" : <Avatar alt="InstaShare" src="https://res.cloudinary.com/dckxgux3k/image/upload/v1698927041/InstaSharePic_id022d.ico" />}
+
         </Typography>
         <FlexBetween
             backgroundColor={neutralLight}
@@ -82,7 +127,7 @@ const Navbar = () => {
             }}
           >
             
-            <SearchBar/>
+            <SearchBar myRequest={myRequest}/>
           </FlexBetween>
       </FlexBetween>
 
@@ -99,11 +144,18 @@ const Navbar = () => {
           <IconButton onClick={() => navigate("/message")}>
             <Message sx={{ fontSize: "25px" }} />
           </IconButton>
-          {/* <Notifications sx={{ fontSize: "25px" }} /> */}
-          <IconButton onClick={() => navigate("/help")}>
-            <Help sx={{ fontSize: "25px" }} />
+          <IconButton onClick={handleNotification}>
+            <Notifications sx={{ fontSize: "25px" }} /> {friendrequest.length}
           </IconButton>
-          
+          <Modal
+                  open={open}
+                  onClose={handleCloseRequest}
+                >
+                  <Box sx={{ ...style, width: 1/3 }}>
+                      <FriendRequest handleCloseRequest={handleCloseRequest}
+                      friendrequest={friendrequest} />
+                    </Box>
+                </Modal>
           <FormControl  variant="standard" value={fullName}>
             <Select
               value={fullName}
@@ -182,10 +234,18 @@ const Navbar = () => {
             <IconButton onClick={() => navigate("/message")}>
               <Message sx={{ fontSize: "25px" }} />
             </IconButton>
-            {/* <Notifications sx={{ fontSize: "25px" }} /> */}
-            <IconButton onClick={() => navigate("/help")}>
-              <Help sx={{ fontSize: "25px" }} />
+            <IconButton onClick={handleNotification}>
+              <Notifications sx={{ fontSize: "25px" }} />{friendrequest.length}
             </IconButton>
+            <Modal
+                  open={open}
+                  onClose={handleCloseRequest}
+                >
+                  <Box sx={{...style, width: 1, height: 3/4, overflow: 'auto' }}>
+                      <FriendRequest handleCloseRequest={handleCloseRequest} 
+                      friendrequest={friendrequest} />
+                    </Box>
+                </Modal>
             <FormControl variant="standard" value={fullName}>
               <Select
                 value={fullName}
@@ -210,7 +270,7 @@ const Navbar = () => {
                 <MenuItem onClick={() => navigate("/reset")}>
                   Đổi mật khẩu
                 </MenuItem>
-                <MenuItem onClick={() => {Logout}}>
+                <MenuItem onClick={() => dispatch(setLogout())}>
                   Đăng xuất
                 </MenuItem>
               </Select>

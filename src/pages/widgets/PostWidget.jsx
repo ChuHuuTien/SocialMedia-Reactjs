@@ -15,7 +15,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "../../state";
 import { host } from "../../utils/APIRoutes";
 import axios from "axios";
-import ManageComment from "../../Components/ManageComment";
+import ManageComment from "../../Components/Comment/ManageComment";
+import UpdatePost from "../../Components/PostWidget/UpdatePost"
+
 import Carousel from 'react-material-ui-carousel';
 
 const PostWidget = ({
@@ -28,7 +30,8 @@ const PostWidget = ({
   userPicturePath,
   likesByUsers,
   commentLength,
-  isProfile
+  isProfile,
+  myRequest
 }) => {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
@@ -41,6 +44,9 @@ const PostWidget = ({
   const [open, setOpen] = useState(false);
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
 
+  // const [isLoading, setIsLoading] = useState(myRequest.includes(postUserId));
+  // console.log(myRequest.includes(postUserId));
+  const isLoading = (myRequest.includes(postUserId))
   const style = {
     position: 'absolute',
     top: '50%',
@@ -59,9 +65,6 @@ const PostWidget = ({
       borderRadius:'10px',
       bgcolor: primary,
     }
-    // pt: 2,
-    // px: 4,
-    // pb: 3,
   };
 
   const patchLike = async () => {
@@ -79,10 +82,17 @@ const PostWidget = ({
   const HandleComment = ()=>{
     setOpen(true);
   };
+  
   const handleClose = () => {
     setOpen(false);
   };
-
+  const [openUpdate, setOpenUpdate] = useState(false);
+  const handleUpdate = ()=>{
+    setOpenUpdate(true);
+  };
+  const handleCloseUpdate = () => {
+    setOpenUpdate(false);
+  };
   const settings = {
     autoPlay: false,
     animation: "fade",
@@ -94,6 +104,7 @@ const PostWidget = ({
     fullHeightHover: true,
     swipe: true
   }
+
   return (
     <WidgetWrapper m="2rem 0">
       <UserPost
@@ -105,7 +116,46 @@ const PostWidget = ({
         isProfile={isProfile}
         content={content}
         picturePath={imageSrcs}
+        handleUpdate={handleUpdate}
+        handleCloseUpdate={handleCloseUpdate}
+        isLoading={isLoading}
+        // setIsLoading={setIsLoading}
       />
+      <Modal
+        open={openUpdate}
+        onClose={handleCloseUpdate}
+      >
+        {isNonMobileScreens ? (
+          <Box sx={{ ...style, width: 1/2, maxHeight: 7/8, height: "auto", overflowY: 'scroll' }}>
+            <UpdatePost 
+              handleCloseUpdate={handleCloseUpdate} 
+              postId={postId}
+              name={name}
+              postUserId={postUserId}
+              content={content}
+              imageSrcs={imageSrcs}
+              createdAt={createdAt}
+              userPicturePath={userPicturePath}
+              isProfile
+            />
+          </Box>
+        ) :(
+            <Box sx={{ ...style, width: 1, maxHeight: 3/4, height: "auto", overflow: 'auto' }}>
+              <UpdatePost 
+                handleCloseUpdate={handleCloseUpdate} 
+                postId={postId}
+                name={name}
+                postUserId={postUserId}
+                content={content}
+                imageSrcs={imageSrcs}
+                createdAt={createdAt}
+                userPicturePath={userPicturePath}
+                isProfile
+              />
+            </Box>
+        )}
+        
+        </Modal>
       <Typography color={main} sx={{ mt: "1rem" }}>
         {content}
       </Typography>
@@ -161,7 +211,7 @@ const PostWidget = ({
               {isNonMobileScreens ? 
                 (
                 <Box sx={{ ...style, width: 1/2, maxHeight: 7/8, height: "auto", overflowY: 'scroll' }}>
-                  <ManageComment handleClose={handleClose} key={postId}
+                  <ManageComment handleClose={handleClose} key={postId} 
                     postId={postId}
                     postUserId={postUserId}
                     name={name}
@@ -196,9 +246,9 @@ const PostWidget = ({
           </FlexBetween>
         </FlexBetween>
 
-        <IconButton>
+        {/* <IconButton>
           <ShareOutlined />
-        </IconButton>
+        </IconButton> */}
       </FlexBetween>
     </WidgetWrapper>
   );

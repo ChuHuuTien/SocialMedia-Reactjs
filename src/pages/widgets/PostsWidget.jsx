@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "../../state";
@@ -19,8 +19,9 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     )
     const posts = await response.data.news;
     dispatch(setPosts({posts: posts}));
+    
   };
-
+  const [myRequest, setMyRequest] = useState([]);
   const getUserPosts = async () => {
     const response = await axios.get(`${host}/post/all/${userId}/?page=${0}&limit=${20}`,
       {
@@ -29,8 +30,13 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     )
     const posts = await response.data.posts;
     dispatch(setPosts({posts: posts}));
-  };
 
+    const res = await axios.get(`${host}/user/friend/myrequest`, {
+      headers: { Authorization: `${token}` },
+    })
+    setMyRequest(res.data.myRequest);
+  };
+  
   useEffect(() => {
     if (isProfile) {
       getUserPosts();
@@ -54,7 +60,6 @@ const PostsWidget = ({ userId, isProfile = false }) => {
         }) => (
           <Box m="2rem 0" sx={{boxShadow: 5, borderRadius: "10px"}} key={_id} >
             <PostWidget
-              
               postId={_id}
               postUserId={creatorId}
               name={`${postedByUser.firstName} ${postedByUser.lastName}`}
@@ -65,6 +70,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
               likesByUsers={likesByUsers}
               commentLength={commentLength}
               isProfile={isProfile}
+              myRequest={myRequest}
             />
           </Box>
         )

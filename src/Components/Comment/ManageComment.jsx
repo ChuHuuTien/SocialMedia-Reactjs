@@ -7,17 +7,20 @@ import {
   FavoriteOutlined,
   ShareOutlined,
   Close,
-  Send
+  Send,
+  MoreVert,
+  Delete
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme, Grid, InputBase } from "@mui/material";
-import FlexBetween from "../Components/FlexBetween";
-import UserPost from "../Components/PostWidget/UserPost";
+import { Box, Divider, IconButton, Typography, useTheme, Grid, InputBase, Popper, ClickAwayListener } from "@mui/material";
+import FlexBetween from "../FlexBetween";
+import UserPost from "../PostWidget/UserPost";
 import { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPost } from "../state";
-import { host } from "../utils/APIRoutes";
+import { setPost } from "../../state";
+import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 import Carousel from 'react-material-ui-carousel';
+import Comment from './Comment';
 
 const ManageComment = ({
   handleClose,
@@ -43,8 +46,9 @@ const ManageComment = ({
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
-  const scrollRef = useRef(null);
 
+  const scrollRef = useRef(null);
+  
   const patchLike = async () => {
     const response = await axios.post(`${host}/post/like`,
       {
@@ -68,8 +72,6 @@ const ManageComment = ({
           headers: { Authorization: `${token}` },
         }
       )
-    console.log(2);
-
       setComments([...comments, response.data.comment]);
       setComment("");
     }catch(error){
@@ -106,20 +108,8 @@ const ManageComment = ({
   //   }
   // }, [comments]);
 
-  const time = (createdAt)=>{
-    function dateFormat(date) {
-      const month = date.getMonth();
-      const day = date.getDate();
-      const monthString = month >= 9 ? month+1 : `0${month+1}`;
-      const dayString = day >= 10 ? day : `0${day}`;
-      return `${date.getHours()}h:${date.getMinutes()}m ${dayString}-${monthString}-${date.getFullYear()}`;
-    }
-    createdAt = new Date(createdAt); 
-    createdAt = dateFormat(createdAt);
-    return createdAt
-  }
   
-
+  
   useEffect(()=>{
     getComments();
   },[])
@@ -235,43 +225,14 @@ const ManageComment = ({
           </FlexBetween>
         </FlexBetween>
 
-        <IconButton>
+        {/* <IconButton>
           <ShareOutlined />
-        </IconButton>
+        </IconButton> */}
       </FlexBetween>
       {comments && (
         <Box mt="0.5rem">
           {comments.map((comment) => (
-            <Box key={`${comment._id}`} sx={{margin: "0px 10px"}}>
-              <Divider variant="fullWidth" style={{ margin: "0px 0px" }} />
-              <Grid container wrap="nowrap" spacing={2}>
-                <Grid item>
-                  <Box sx={{ display: "inline"}}>
-                        <img
-                          style={{ objectFit: "cover", borderRadius: "50%"}}
-                          width="30px"
-                          height="30px"
-                          alt="user"
-                          src={comment.commentByUser.avatarURL}
-                          display="inline"
-                        />
-                    </Box>
-                </Grid>
-                <Grid justifyContent="left" item xs zeroMinWidth>
-                  <label style={{ margin: 0, textAlign: "left" }}>
-                    <label ><b>{comment.commentByUser.firstName+" "+ comment.commentByUser.lastName +" "} </b> · </label>
-                    <label style={{ margin: 0, color: "gray" }}> {" "+time(comment.createdAt)}</label>
-                  </label>
-                  <p style={{ textAlign: "left" }}>
-                    {comment.content}
-                  </p>
-                  {/* <p style={{ textAlign: "left", color: "gray" }}>
-                    posted 1 minute ago
-                  </p> */}
-                </Grid>
-              </Grid>
-            </Box>
-
+            <Comment key={comment._id} postId={postId} comment={comment} comments={comments} setComments={setComments}/>
           ))}
           
         </Box>

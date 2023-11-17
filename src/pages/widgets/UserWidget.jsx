@@ -12,6 +12,7 @@ import UserImage from "../../Components/UserImage";
 import FlexBetween from "../../Components/FlexBetween";
 import WidgetWrapper from "../../Components/WidgetWrapper";
 import ManageAccount from "../../Components/ManageAccount";
+import ManageFriends from "../../Components/FriendList/ManageFriends";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -57,7 +58,14 @@ const UserWidget = ({ userId, picturePath, isMyself }) => {
   const handleClose = () => {
     setOpen(false);
   };
+  const [openFriends, setOpenFriends] = useState(false);
 
+  const HandleFriends = ()=>{
+    setOpenFriends(true);
+  }
+  const handleCloseFriends = () => {
+    setOpenFriends(false);
+  };
   useEffect(() => {
     getUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -102,7 +110,34 @@ const UserWidget = ({ userId, picturePath, isMyself }) => {
             >
               {firstName} {lastName}
             </Typography>
-            <Typography color={medium}>{friends.length} friends</Typography>
+
+            <Typography 
+              color={medium} 
+              sx={{
+                '&:hover': { cursor: 'pointer'}
+              }} 
+              onClick={HandleFriends}
+            >
+              {friends.length} bạn bè
+              </Typography>
+                <Modal
+                  open={openFriends}
+                  onClose={handleCloseFriends}
+                >
+                  {isNonMobileScreens ? 
+                    (
+                    <Box sx={{ ...style, width: 1/3 }}>
+                      <ManageFriends handleClose={handleCloseFriends} userId={userId}/>
+                    </Box>
+                    ):(
+                    <Box sx={{ ...style, width: 1, height: 3/4, overflow: 'auto'}}>
+                      <ManageFriends handleClose={handleCloseFriends} userId={userId}/>
+                    </Box>
+                    )
+                  }
+                </Modal>
+
+            
           </Box>
         </FlexBetween>
         {isMyself &&

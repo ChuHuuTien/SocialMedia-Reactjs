@@ -1,71 +1,89 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { IoIosSend } from 'react-icons/io'
-import { ButtonContainer } from '../../styled/Button';
 import useChatActions from '../../hooks/useChatActions';
 import { useChat } from '../../context/ChatProvider';
 import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 import { useSelector } from "react-redux";
-
-const MessageForm = styled.form`
-    padding: 0.5vw 0;
-    display: flex;
-    align-items: center;
-    height: 10%;
-
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-
-    & input {
-        flex: 1;
-        height: 100%;
-        width: 100%;
-        border: none;
-    }
-`;
+import { Box, useTheme, InputBase, Button, TextField} from "@mui/material"
 
 const ChatForm = () => {
     const inputRef = useRef(null);
     const { sendMessage } = useChatActions();
     const { currentRoom, setNewMessage } = useChat();
     const token = useSelector((state) => state.token);
-
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        if(inputRef.current.value == "") return;
+    const { palette } = useTheme();
+    const [comment, setComment] = useState("");
+    const dark = palette.neutral.dark;
+    
+    const handelChat = async()=>{
+      if(comment == "") return;
         try{
-            const newmsg = await axios.post(`${host}/room/${currentRoom._id}/message`, 
-            {
-                messageText: inputRef.current.value,
+          const newmsg = await axios.post(`${host}/room/${currentRoom._id}/message`, 
+          {
+            messageText: comment,
+          },
+          {
+            headers: {
+              Authorization: token
             },
-            {
-                headers: {
-                    Authorization: token
-                },
-            }
-            );
-            sendMessage(newmsg.data.message);
-            setNewMessage(newmsg.data.message);
-            inputRef.current.value = '';
-            inputRef.current.focus();
+          }
+          );
+          sendMessage(newmsg.data.message);
+          setNewMessage(newmsg.data.message);
+          setComment("")
+          inputRef.current.focus();
         }catch(error){
-            console.log(error);
+          console.log(error);
         }
-        
     }
-
     return (
-        <MessageForm onSubmit={ onSubmit }>
-            <input type="text" placeholder='Type a message here' ref={ inputRef }/>
+      <Box 
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          verticalAlign: "middle",
+        }}
+        padding="15px"
+      >
+          <InputBase
+            onKeyDown={(event) => {
+              if (event.key=="Enter" && event.keyCode == '13'){
+                return handelChat()
+              }
+            }}
+            autoFocus = {true}
+            ref={ inputRef }
+            placeholder="Nhắn tin..."
+            onChange={(e) => setComment(e.target.value)}
+            value={comment}
+            multiline={true}
+            maxRows={2}
+            sx={{
+                maxHeight:"100px",
+                width: "100%",
+                backgroundColor: palette.neutral.light,
+                borderRadius: "10px",
+                padding: "5px 10px",
+                fontWeight: 200,
+                color: dark 
+            }}
             
-            <ButtonContainer flex="0" padding="0" active={ true } size="2.2em" borderRadius="50%">
-                <button>
-                    <IoIosSend fill='#fff'/>
-                </button>
-            </ButtonContainer>
-        </MessageForm>
+          />
+          <Button 
+            disabled={!comment}
+            size="medium" 
+            onClick={handelChat}
+            sx={{
+              padding:"0px 0px"
+            }}
+          >
+            Gửi
+          </Button>
+      </Box>
     );
 };
 

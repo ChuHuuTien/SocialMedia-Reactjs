@@ -5,77 +5,16 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { useChat } from '../../context/ChatProvider';
 import useChatActions from '../../hooks/useChatActions';
-
-
-const RoomListContainer = styled.div`
-    --space: 1em;
-    --horizontal-space: 2vw;
-    
-    display: flex;
-    flex-direction: column;
-    width: 26%;
-    height: 100%;
-    padding-top: var(--vertical-padding);
-    overflow: auto;
-    background: var( --blue-gradient);
-    color: #fff;
-    
-    & h3 {
-        font-size: 1.2em;
-        font-weight: 500;
-        padding: 0.9em var(--horizontal-space);
-    }
-
-    @media (max-width: 820px) {
-        position: absolute;
-        opacity: ${ props => props.open ? '1' : '0'};
-        pointer-events: ${ props => props.open ? 'null' : 'none'};
-        right: 0;
-        width: 100%;
-        border-radius: 0;
-        z-index: 1;
-    }
-`;
-
-const RoomItem = styled.li`
-    display: flex;
-    gap: 1vw;
-    width: 100%;
-    flex: 1;
-    padding: var(--space) var(--horizontal-space);
-    list-style: none;
-    background: ${ props => props.active ?  'var(--blue-active-color)' : 'transparent'};
-    cursor: pointer;
-    transition: all .05s;
-
-    &:hover {
-        background: var(--blue-active-color);
-    }
-
-    & img {
-        height: 3vw;
-        width: 3vw;
-        border-radius: 20px;
-        object-fit: cover;
-    }
-
-    & div {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    & span {
-        font-weight: 500;
-        font-size: 0.8em;
-    }
-`;
-
-
-// Static rooms in the chat
+import { Box, useMediaQuery, useTheme,Typography,Avatar } from "@mui/material";
 
 
 const RoomList = () => {
+    const theme = useTheme();
+    const isMobileScreens = useMediaQuery("(max-width: 820px)");
+    const alt = theme.palette.background.alt;
+    const { palette } = useTheme();
+    const dark = palette.neutral.dark;
+
     const { joinRoom, leaveRoom } = useChatActions();
     const { currentRoom, rooms, setCurrentRoom } = useChat();
 
@@ -105,31 +44,83 @@ const RoomList = () => {
     
 
     return (
-        <RoomListContainer 
-            // open={ isNavOpen }
+      <Box 
+        width=" 100%"
+        height= "100%"
+        bgcolor={alt}
+        color="#fff"
+      >
+        <Typography 
+          color={dark} 
+          padding="10px"
+          fontSize="1.2rem"
+          fontWeight="500"
         >
-            <h3>Rooms</h3>
-
-            <ul>
-                {
-                    filteredRooms.map(room => {
-                        const { _id, users} = room;
-
-                            return (
-                                <RoomItem active={ currentRoom?._id === _id } key={ _id } onClick={ () => handleRoomClick(_id) }>
-                                    <img alt='room-img' src={ users[0].avatarURL} />
-    
-                                    <div>
-                                        <span>{ `${users[0].firstName} ${users[0].lastName}` }</span>
-                                        
-                                    </div>
-                                </RoomItem>
-                            );
-                        
-                    })
-                }
-            </ul>
-        </RoomListContainer>
+          Danh sách phòng
+        </Typography>
+        <Box 
+          sx={{
+            overflowY: "scroll",
+            '::-webkit-scrollbar': {
+              width: '0.4em'
+            },
+            '::-webkit-scrollbar-thumb':{
+              borderRadius:'10px',
+              bgcolor: "#cccccc"
+              // bgcolor: theme.palette.mode === 'light' ? '#fff' : '#000',
+            }
+          }}
+          height="470px"
+          >
+            
+        {
+          filteredRooms.map(room => {
+            const { _id, users} = room;
+            return (
+              <Box 
+                display="flex"
+                gap= "1vw"
+                width= "100%"
+                padding="10px"
+                bgcolor={currentRoom?._id === _id? "gray": {alt}}
+                sx={{
+                  '&:hover': { cursor: 'pointer'},
+                  transition: "all .05s"
+                }}
+                key={ _id } 
+                onClick={ () => handleRoomClick(_id) }
+              >
+                <Avatar 
+                  alt='room-img' 
+                  src={ users[0].avatarURL} 
+                  sx={{
+                    height: "3vw",
+                    width: "3vw",
+                    borderRadius: "20px",
+                    objectFit: "cover"
+                  }}
+                />
+                <Box
+                  display= "flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                >
+                  <Typography
+                    fontWeight="500"
+                    fontSize="0.8em"
+                    color={dark} 
+                  >
+                  { `${users[0].firstName} ${users[0].lastName}` }
+                  </Typography>
+                </Box>
+              </Box>
+            );
+                    
+        })
+        }
+        </Box>
+          
+    </Box>
     );
 };
 

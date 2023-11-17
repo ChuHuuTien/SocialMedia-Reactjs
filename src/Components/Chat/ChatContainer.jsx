@@ -12,165 +12,146 @@ import { useChat } from '../../context/ChatProvider';
 import { host } from "../../utils/APIRoutes";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import {AppBar, Box, useMediaQuery, useTheme, Typography, Avatar } from "@mui/material";
 
-const ChatAppContainer = styled.div`
-    --vertical-padding: 3vh;
-
-    display: flex;
-    gap: 2vw;
-    height: 80vh;
-    width: 80vw;
-    justify-content: space-between;
-    background: #e5e7e8;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
-                rgba(0, 0, 0, 0.12) 0px -12px 30px,
-                rgba(0, 0, 0, 0.12) 0px 4px 6px,
-                rgba(0, 0, 0, 0.17) 0px 12px 13px,
-                rgba(0, 0, 0, 0.09) 0px -3px 5px;
-
-    @media (max-width: 820px) {
-        position: relative;
-        width: 100%;
-        height: 100vh;
-        flex-direction: column-reverse;
-        font-size: 0.85rem;
-        gap: 0;
-    }
-`;
-
-const CenterContainer = styled.div`
-    display: flex;
-    flex: 1;
-    gap: 1.5vw;
-    flex-direction: column;
-    height: 100%;
-    margin: auto 0;
-    padding: 3vw 1vw;
-
-    @media (max-width: 820px) {
-        height: 80%;
-    }
-    
-`;
-
-const Chat = styled.div`
-    padding: var(--vertical-padding) var(--vertical-padding) 1.5vh var(--vertical-padding);
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    height: 80%;
-    background: #fff;
-    border-radius: 30px;
-
-    @media (max-width: 820px) {
-        margin: 0 2.5vw;
-    }
-`;
-
-const Header = styled.header`
-    display: flex;
-    align-items: center;
-    gap: 1.1em;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    padding-bottom: 1em;
-    height: 3.2em;
-    
-    & img {
-        height: 100%;
-        border-radius: 0.7em;
-    }
-
-    & h2 {
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-`;
-
-const WelcomeMessage = styled.p`
-    margin: auto 0;
-    font-size: 0.9em;
-    text-align: center;
-    color: rgba(0, 0, 0, 0.5);
-`;
 
 const ChatContainer = () => {
-    // const [isNavOpen, setIsNavOpen] = useState();
-    const { currentRoom, rooms, setRooms } = useChat();
-    // const [rooms, setRooms] = useState(null);
-    const token = useSelector((state) => state.token);
+  const theme = useTheme();
+  const isNonMobileScreens = useMediaQuery("(min-width: 820px)");
+  const alt = theme.palette.background.alt;
+  const { palette } = useTheme();
+  const dark = palette.neutral.dark;
+  const { currentRoom, rooms, setRooms } = useChat();
+  const token = useSelector((state) => state.token);
 
-    useEffect( () => {
-        const loadData = async ()=>{
-            const response = await axios.get(`${host}/room`,{
-                headers: {
-                  Authorization: token
-                },
-            });
-            setRooms(response.data.conversation);
-        };
-        loadData();
-    },[]);
-    return (
-        <ChatAppContainer>
-            {/* <Navigation openRoomNav={ () => setIsNavOpen(true) } /> */}
-            {rooms && <RoomList
-                // isNavOpen={ isNavOpen }
-                // setIsNavOpen={ setIsNavOpen }
-                // rooms={rooms}
-            />}
-            <CenterContainer>
-                <FlexBetween
-                    backgroundColor="#f0f0f0"
-                    borderRadius="9px"
-                    gap="3rem"
-                    padding="0.1rem 1.5rem" 
-                    margin=""
-                    sx={{
-                        width: 325
-                    }}
+  useEffect( () => {
+    const loadData = async ()=>{
+      const response = await axios.get(`${host}/room`,{
+          headers: {
+            Authorization: token
+          },
+        });
+      setRooms(response.data.conversation);
+    };
+    loadData();
+  },[]);
+  return (
+    <Box 
+      width="100%"
+      height="100%"
+      padding="5.5rem 1rem 0rem 1rem"
+      display={isNonMobileScreens ? "flex" : "block"}
+      justifyContent="space-between"
+      // sx={{boxShadow: 5}}
+      
+    >          
+      <Box flexBasis={isNonMobileScreens ? "25%" : "0%"} border= '1px solid #ccc' >
+        <Box 
+          bgcolor={alt}
+          padding="10px"
+          borderBottom='1px solid #ccc'
+        > 
+          <SearchBar />
+        </Box>
+        <Box>
+          {rooms && isNonMobileScreens&& 
+            <RoomList/>
+          } 
+        </Box>
+      </Box>
+      <Box flexBasis={isNonMobileScreens ? "75%" : "100%"} border= '1px solid #ccc'>          
+        <Box
+          // padding= "3vh 3vh 1vh 3vh"
+          padding= "0"
+          display= "flex"
+          flexDirection="column"
+          height= "100%"
+          bgcolor={alt}
+        >
+          {
+            !currentRoom ? 
+            <Box
+              alignItems="center"
+            >
+              <Typography 
+                margin="2rem 0"
+                fontSize="1em"
+                textAlign="center"
+                color={dark} 
+                padding="10px"
+                fontWeight="500"
+                // position= 'absolute'
+                top= '50%'
+                left= '50%'
+              >
+                Tin nhắn của bạn <br/> 
+                Gửi tin nhắn riêng tư cho bạn bè 
+                <br/> Tìm kiếm và kết bạn để bắt đầu! 🙋🏽‍♂️
+              </Typography>
+            </Box>
+            :
+            <Box >
+              <Box
+                display= "flex"
+                alignItems= "center"
+                gap="1em"
+                padding="1vh 1vh 1vh 1vh"
+                height="3.2em"
+                borderBottom='1px solid #ccc'
+              > 
+                <Avatar 
+                  alt="room-img" 
+                  src={ currentRoom.users[0].avatarURL } 
+                  sx={{
+                    height:"100%",
+                    borderRadius: "0.7em"
+                  }}
+                />
+                <Typography
+                  fontSize="0.85em"
+                  fontWeight={600}
                 >
-                    
-                    <SearchBar/>
-                </FlexBetween>
-                <Chat>
-                    {
-                        ! currentRoom ? 
-                        
-                        <WelcomeMessage>Come join the fun! <br/> Chat with friends or meet new ones in one of our lively chat rooms.<br/> See you there! 🙋🏽‍♂️</WelcomeMessage>
-                        :
-                        <>
-                            <Header> 
-                                {currentRoom.type=="private" ? (
-                                    <>
-                                        <img alt='room-img' src={ currentRoom.users[0].avatarURL } />
-                                        <div>
-                                            <h2>{ `${currentRoom.users[0].firstName} ${currentRoom.users[0].lastName}` }</h2>
-                                            {/* <Description color='#000' size='0.75em'>{ currentRoom.description }</Description> */}
-                                        </div>
-                                    </>
-                                ):(
-                                    <>
-                                        <img alt='room-img' src={ "https://res.cloudinary.com/dckxgux3k/image/upload/v1690714125/AvatarGroup_at4kad.png" } />
-                                        <div>
-                                            <h2>{ currentRoom.groupName }</h2>
-                                            {/* <Description color='#000' size='0.75em'>{ currentRoom.description }</Description> */}
-                                        </div>
-                                    </>
-                                )}
-                                
-                            </Header>
-                            
-                            <Conversation />
-            
-                            <ChatForm />
-                        </>
+                  { `${currentRoom.users[0].firstName} ${currentRoom.users[0].lastName}` }
+                </Typography>      
+              </Box>
+                
+              <Box 
+                sx={{
+                  overflowY: "scroll", 
+                  height: "500px" ,
+                  '::-webkit-scrollbar': {
+                    width: '0.4em'
+                  },
+                  '::-webkit-scrollbar-thumb':{
+                    borderRadius:'10px',
+                    bgcolor: "#cccccc"
+                  }
+                }}
+                borderBottom='1px solid #ccc'
+              >
+                <Conversation />
+              </Box>
 
-                    }
-                </Chat>
-            </CenterContainer>
+              <Box 
+                // sx={{
+                //   position: "sticky",
+                //   bottom: "0px",
+                // }}
+              >
+
+                <ChatForm />
+              </Box>   
+            </Box>
+
+          }
+          </Box>
+
+
+
+            </Box>
 
             
-        </ChatAppContainer>
+        </Box>
     );
 };
 

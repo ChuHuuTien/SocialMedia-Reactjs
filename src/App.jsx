@@ -3,6 +3,7 @@
 import { React } from 'react'
 import HomePage from "./pages/homePage";
 import LoginPage from "./pages/loginPage";
+import ForgotPage from "./pages/forgotPage";
 import ProfilePage from "./pages/profilePage";
 import ResetPage from "./pages/resetPage";
 import HelpPage from "./pages/helpPage";
@@ -36,10 +37,11 @@ export default function App() {
             <Routes>
 
               <Route path="/" element={isAuth ? <HomePage /> : <Navigate to="/login" />} />
+              <Route path="/forgot" element={!isAuth? <ForgotPage /> : <Navigate to="/" />} />
               <Route path="/login" element={!isAuth? <LoginPage /> : <Navigate to="/" />} />
-              <Route path="/reset" element={<ResetPage />} />
-              <Route path="/help" element={<HelpPage />} />
-              <Route path="/message" element={<MessagePage />} />
+              <Route path="/reset" element={isAuth ?<ResetPage />:  <Navigate to="/" />} />
+              <Route path="/help" element={isAuth ?<HelpPage />:  <Navigate to="/" />} />
+              <Route path="/message" element={isAuth ? <MessagePage /> :  <Navigate to="/" /> } />
               <Route path="/profile/:userId" element={isAuth ? <ProfilePage /> : <Navigate to="/" />} />
 
             </Routes>
