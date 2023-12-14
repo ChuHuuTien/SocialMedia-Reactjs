@@ -20,14 +20,7 @@ import {host} from '../../utils/APIRoutes';
 import WidgetWrapper from "../WidgetWrapper";
 
 const DeleteFriend = ({handleCloseDelete, name, patchFriend}) => {
-  const dispatch = useDispatch();
   const { palette } = useTheme();
-  const primary = palette.primary.main;
-  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
-  const friends = useSelector((state) => state.profilefriends);
-  const [searchItem, setSearchItem] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState([]);
-
   return (
     <WidgetWrapper>
       <Typography

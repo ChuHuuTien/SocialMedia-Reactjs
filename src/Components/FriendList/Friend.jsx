@@ -41,7 +41,7 @@ const Friend = ({ friendId, name, userPicturePath, myRequest }) => {
   };
   const HandelDelete = async () => {
     setOpenDelete(true)
-    
+  
   };
   const handleCloseDelete = async ()=>{
     setOpenDelete(false);

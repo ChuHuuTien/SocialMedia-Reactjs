@@ -33,8 +33,19 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   const medium = palette.neutral.medium;
   const isFriend = friends.find((friend) => friend._id === friendId);
   const isNotMyself = friendId !== userid;
-  const [openDelete, setOpenDelete] = useState(false);
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
 
+  const [openDelete, setOpenDelete] = useState(false);
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    bgcolor: 'background.paper',
+    // border: '1px solid #ccc!important',
+    borderRadius: '25px',
+    boxShadow: 24,
+  };
   function Format(date) {
     const now = new Date(Date.now());
     date = new Date(date)
@@ -89,7 +100,7 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
   };
   const HandelOpenDelete = async ()=>{
     setOpenDelete(true)
-    setPopperAnc(null);
+    // setPopperAnc(null);
   };
   const handleCloseDelete = async ()=>{
     setOpenDelete(false);
@@ -150,12 +161,30 @@ const UserPost = ({ friendId, name, createdAt, userPicturePath, postId, isProfil
         isNotMyself ? (
             <div>
               {isFriend && !isLoading && (
+              <>
               <IconButton
-                onClick={() => removeFriend()}
+                // onClick={() => removeFriend()}
+                onClick={() => HandelOpenDelete()}
                 sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
-              >
+                >
                 <PersonRemoveOutlined sx={{ color: primaryDark }} />
               </IconButton>
+              <Modal
+                open={openDelete}
+                onClose={handleCloseDelete}
+              >
+                <Box 
+                  sx={{ 
+                    ...style, 
+                  }}
+                  width={isNonMobileScreens? 1/3: 1}
+                  height="auto"
+                  maxHeight={isNonMobileScreens? 7/8: 3/4}
+                >
+                    <DeleteFriend handleCloseDelete={handleCloseDelete} name={name} patchFriend={removeFriend}/>
+                  </Box>
+              </Modal>
+              </>
               )}
               {!isFriend && !isLoading && !load && (
                 <IconButton
